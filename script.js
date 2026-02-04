@@ -171,7 +171,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const noBtn = document.getElementById('noBtn');
     const response = document.getElementById('response');
     const arrow = document.createElement('div');
-    const arrowDisplayDelayMs = 30000;
+    const arrowDisplayDelayMs = 20000; // Changed from 30000 to 20000 (20 seconds)
     
     yesBtn.addEventListener('click', function() {
         response.textContent = 'Bold choice. Incorrect, but bold.';
