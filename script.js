@@ -107,14 +107,19 @@ function applyRandomStyle() {
     // Apply heart gradient
     const heartBefore = document.querySelector('.heart');
     if (heartBefore) {
-        const style = document.createElement('style');
-        style.textContent = `
+        // Reuse or create style element for heart gradient
+        let styleElement = document.getElementById('dynamic-heart-style');
+        if (!styleElement) {
+            styleElement = document.createElement('style');
+            styleElement.id = 'dynamic-heart-style';
+            document.head.appendChild(styleElement);
+        }
+        styleElement.textContent = `
             .heart:before,
             .heart:after {
                 background: ${selectedStyle.heartGradient} !important;
             }
         `;
-        document.head.appendChild(style);
     }
     
     // Apply title styles
@@ -128,30 +133,29 @@ function applyRandomStyle() {
     const message = document.querySelector('.message');
     message.style.color = selectedStyle.messageColor;
     
-    // Apply button styles
+    // Apply button styles using data attributes
     const yesBtn = document.getElementById('yesBtn');
     yesBtn.style.background = selectedStyle.yesButtonBg;
-    yesBtn.dataset.hoverBg = selectedStyle.yesButtonHover;
     
     const noBtn = document.getElementById('noBtn');
     noBtn.style.background = selectedStyle.noButtonBg;
     noBtn.style.color = selectedStyle.noButtonColor;
-    noBtn.dataset.hoverBg = selectedStyle.noButtonHover;
     
-    // Add hover effects
-    yesBtn.addEventListener('mouseenter', function() {
-        this.style.background = selectedStyle.yesButtonHover;
-    });
-    yesBtn.addEventListener('mouseleave', function() {
-        this.style.background = selectedStyle.yesButtonBg;
-    });
-    
-    noBtn.addEventListener('mouseenter', function() {
-        this.style.background = selectedStyle.noButtonHover;
-    });
-    noBtn.addEventListener('mouseleave', function() {
-        this.style.background = selectedStyle.noButtonBg;
-    });
+    // Add hover effects using CSS (reuse or create style element)
+    let hoverStyleElement = document.getElementById('dynamic-hover-style');
+    if (!hoverStyleElement) {
+        hoverStyleElement = document.createElement('style');
+        hoverStyleElement.id = 'dynamic-hover-style';
+        document.head.appendChild(hoverStyleElement);
+    }
+    hoverStyleElement.textContent = `
+        #yesBtn:hover {
+            background: ${selectedStyle.yesButtonHover} !important;
+        }
+        #noBtn:hover {
+            background: ${selectedStyle.noButtonHover} !important;
+        }
+    `;
     
     // Store response color for later use
     document.body.dataset.responseColor = selectedStyle.responseColor;
