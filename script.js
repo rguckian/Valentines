@@ -170,22 +170,16 @@ document.addEventListener('DOMContentLoaded', function() {
     const yesBtn = document.getElementById('yesBtn');
     const noBtn = document.getElementById('noBtn');
     const response = document.getElementById('response');
-    const arrowPointer = document.querySelector('.arrow-pointer');
-    
-    // Show arrow after 20 seconds
-    setTimeout(function() {
-        if (arrowPointer) {
-            arrowPointer.classList.add('visible');
-        }
-    }, 20000);
+    const arrow = document.createElement('div');
+    const arrowDisplayDelayMs = 20000; // Changed from 30000 to 20000 (20 seconds)
     
     yesBtn.addEventListener('click', function() {
-        response.textContent = '🎉 Yay! You made my day! ❤️';
+        response.textContent = 'Bold choice. Incorrect, but bold.';
         response.style.color = document.body.dataset.responseColor || '#ff6b6b';
     });
     
     noBtn.addEventListener('click', function() {
-        response.textContent = '😢 Maybe next time...';
+        response.textContent = 'Bold Choice. Incorrect, but bold';
         response.style.color = '#999';
         
         // Make the Yes button bigger to encourage clicking it instead
@@ -245,9 +239,30 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    function positionArrow() {
+        const rect = yesBtn.getBoundingClientRect();
+        arrow.style.left = `${rect.left + rect.width / 2}px`;
+        arrow.style.top = `${rect.top - 12}px`;
+    }
+
+    function showArrow() {
+        positionArrow();
+        arrow.classList.add('is-visible');
+    }
+
     updateBaseRect();
-    window.addEventListener('resize', updateBaseRect);
+    window.addEventListener('resize', function() {
+        updateBaseRect();
+        if (arrow.classList.contains('is-visible')) {
+            positionArrow();
+        }
+    });
     startAnimation();
+
+    arrow.className = 'yes-arrow';
+    arrow.textContent = '⬆️';
+    document.body.appendChild(arrow);
+    window.setTimeout(showArrow, arrowDisplayDelayMs);
 
     document.addEventListener('mousemove', function(event) {
         const rect = noBtn.getBoundingClientRect();
