@@ -246,10 +246,31 @@ body::after {
     box-shadow: 0 4px 15px rgba(255, 105, 135, 0.4);
 }
 
+.btn-yes::after {
+    content: '✨';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.6);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    text-shadow: -18px -12px 0 rgba(255, 255, 255, 0.9),
+        20px -8px 0 rgba(255, 255, 255, 0.85),
+        -16px 14px 0 rgba(255, 255, 255, 0.8),
+        18px 16px 0 rgba(255, 255, 255, 0.85);
+    pointer-events: none;
+}
+
 .btn-yes:hover {
     background: linear-gradient(135deg, #ff3366, #ff1744);
     transform: scale(1.1);
-    box-shadow: 0 6px 20px rgba(255, 105, 135, 0.6);
+    box-shadow: 0 6px 20px rgba(255, 105, 135, 0.6), 0 0 14px rgba(255, 255, 255, 0.7);
+}
+
+.btn-yes:hover::after {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+    animation: sparkle 1.2s ease-in-out infinite;
 }
 
 .btn-no {
@@ -273,6 +294,46 @@ body::after {
     min-height: 30px;
     text-shadow: 2px 2px 4px rgba(255, 105, 135, 0.2);
     animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes sparkle {
+    0%, 100% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+    50% {
+        opacity: 0.5;
+        transform: translate(-50%, -50%) scale(1.2);
+    }
+}
+
+@keyframes arrowFlash {
+    0%, 100% {
+        opacity: 1;
+        transform: translate(-50%, -100%) scale(1);
+    }
+    50% {
+        opacity: 0.4;
+        transform: translate(-50%, -100%) scale(1.2);
+    }
+}
+
+.yes-arrow {
+    position: fixed;
+    left: 0;
+    top: 0;
+    font-size: 2rem;
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, -100%);
+    text-shadow: 0 0 12px rgba(255, 255, 255, 0.8);
+    transition: opacity 0.3s ease;
+    z-index: 5;
+}
+
+.yes-arrow.is-visible {
+    opacity: 1;
+    animation: arrowFlash 1s ease-in-out infinite;
 }
 
 @keyframes fadeIn {
