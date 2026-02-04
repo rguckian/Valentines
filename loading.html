@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loading the Big News...</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Decorative floating hearts -->
+    <div class="floating-hearts">
+        <span class="floating-heart">💗</span>
+        <span class="floating-heart">💖</span>
+        <span class="floating-heart">💕</span>
+        <span class="floating-heart">💝</span>
+        <span class="floating-heart">❤️</span>
+    </div>
+
+    <div class="container loading-container">
+        <div class="heart-container">
+            <div class="heart"></div>
+        </div>
+
+        <h1 class="title">Uploading Your Answer...</h1>
+
+        <div class="loading-message" id="loadingMessage"></div>
+
+        <div class="loading-circle">
+            <svg viewBox="0 0 120 120" role="img" aria-label="Loading progress">
+                <circle class="track" cx="60" cy="60" r="52"></circle>
+                <circle class="progress" cx="60" cy="60" r="52" id="loadingCircle"></circle>
+            </svg>
+            <div class="loading-progress-text" id="loadingProgressText">0%</div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
