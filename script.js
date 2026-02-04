@@ -183,4 +183,63 @@ document.addEventListener('DOMContentLoaded', function() {
         // Make the Yes button bigger to encourage clicking it instead
         yesBtn.style.transform = 'scale(1.2)';
     });
+
+    const escapeRadius = 140;
+    const maxPush = 60;
+    const easeFactor = 0.15;
+    const boundaryPadding = 12;
+    let currentX = 0;
+    let currentY = 0;
+    let targetX = 0;
+    let targetY = 0;
+    let baseLeft = 0;
+    let baseTop = 0;
+
+    function updateBaseRect() {
+        const rect = noBtn.getBoundingClientRect();
+        baseLeft = rect.left - currentX;
+        baseTop = rect.top - currentY;
+    }
+
+    function clampTarget(rect) {
+        const minX = boundaryPadding - baseLeft;
+        const maxX = window.innerWidth - rect.width - boundaryPadding - baseLeft;
+        const minY = boundaryPadding - baseTop;
+        const maxY = window.innerHeight - rect.height - boundaryPadding - baseTop;
+        targetX = Math.min(Math.max(targetX, minX), maxX);
+        targetY = Math.min(Math.max(targetY, minY), maxY);
+    }
+
+    function animateRunaway() {
+        currentX += (targetX - currentX) * easeFactor;
+        currentY += (targetY - currentY) * easeFactor;
+        noBtn.style.setProperty('--runaway-x', `${currentX}px`);
+        noBtn.style.setProperty('--runaway-y', `${currentY}px`);
+        requestAnimationFrame(animateRunaway);
+    }
+
+    updateBaseRect();
+    window.addEventListener('resize', updateBaseRect);
+    requestAnimationFrame(animateRunaway);
+
+    document.addEventListener('mousemove', function(event) {
+        const rect = noBtn.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        const dx = centerX - event.clientX;
+        const dy = centerY - event.clientY;
+        const distance = Math.hypot(dx, dy);
+
+        if (distance < escapeRadius) {
+            const push = ((escapeRadius - distance) / escapeRadius) * maxPush;
+            const normX = distance === 0 ? (Math.random() - 0.5) : dx / distance;
+            const normY = distance === 0 ? (Math.random() - 0.5) : dy / distance;
+            targetX += normX * push;
+            targetY += normY * push;
+            clampTarget(rect);
+        } else if (distance > escapeRadius * 1.4) {
+            targetX = 0;
+            targetY = 0;
+        }
+    });
 });
