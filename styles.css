@@ -212,6 +212,12 @@ body::after {
 .arrow-pointer {
     font-size: 2.5em;
     animation: pointLeft 1s ease-in-out infinite;
+    opacity: 0;
+    transition: opacity 0.5s ease-in;
+}
+
+.arrow-pointer.visible {
+    opacity: 1;
 }
 
 @keyframes pointLeft {

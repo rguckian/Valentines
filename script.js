@@ -170,6 +170,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const yesBtn = document.getElementById('yesBtn');
     const noBtn = document.getElementById('noBtn');
     const response = document.getElementById('response');
+    const arrowPointer = document.querySelector('.arrow-pointer');
+    
+    // Show arrow after 20 seconds
+    setTimeout(function() {
+        if (arrowPointer) {
+            arrowPointer.classList.add('visible');
+        }
+    }, 20000);
     
     yesBtn.addEventListener('click', function() {
         response.textContent = '🎉 Yay! You made my day! ❤️';
