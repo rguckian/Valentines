@@ -210,17 +210,36 @@ document.addEventListener('DOMContentLoaded', function() {
         targetY = Math.min(Math.max(targetY, minY), maxY);
     }
 
+    let animationId = null;
+
     function animateRunaway() {
-        currentX += (targetX - currentX) * easeFactor;
-        currentY += (targetY - currentY) * easeFactor;
+        const deltaX = targetX - currentX;
+        const deltaY = targetY - currentY;
+        currentX += deltaX * easeFactor;
+        currentY += deltaY * easeFactor;
         noBtn.style.setProperty('--runaway-x', `${currentX}px`);
         noBtn.style.setProperty('--runaway-y', `${currentY}px`);
-        requestAnimationFrame(animateRunaway);
+
+        if (Math.abs(deltaX) > 0.5 || Math.abs(deltaY) > 0.5) {
+            animationId = requestAnimationFrame(animateRunaway);
+        } else {
+            currentX = targetX;
+            currentY = targetY;
+            noBtn.style.setProperty('--runaway-x', `${currentX}px`);
+            noBtn.style.setProperty('--runaway-y', `${currentY}px`);
+            animationId = null;
+        }
+    }
+
+    function startAnimation() {
+        if (!animationId) {
+            animationId = requestAnimationFrame(animateRunaway);
+        }
     }
 
     updateBaseRect();
     window.addEventListener('resize', updateBaseRect);
-    requestAnimationFrame(animateRunaway);
+    startAnimation();
 
     document.addEventListener('mousemove', function(event) {
         const rect = noBtn.getBoundingClientRect();
@@ -237,9 +256,13 @@ document.addEventListener('DOMContentLoaded', function() {
             targetX += normX * push;
             targetY += normY * push;
             clampTarget(rect);
+            startAnimation();
         } else if (distance > escapeRadius * 1.4) {
-            targetX = 0;
-            targetY = 0;
+            if (targetX !== 0 || targetY !== 0) {
+                targetX = 0;
+                targetY = 0;
+                startAnimation();
+            }
         }
     });
 });
