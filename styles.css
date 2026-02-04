@@ -256,6 +256,8 @@ body::after {
     background: linear-gradient(135deg, #ffc3c9, #ffb3ba);
     color: #8b5a7d;
     border: 2px solid rgba(255, 182, 193, 0.3);
+    will-change: transform;
+    transform: translate(var(--runaway-x, 0), var(--runaway-y, 0));
 }
 
 .btn-no:hover {
