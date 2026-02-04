@@ -171,7 +171,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const noBtn = document.getElementById('noBtn');
     const response = document.getElementById('response');
     const arrow = document.createElement('div');
-    let arrowInterval = null;
+    const arrowDisplayDelayMs = 30000;
     
     yesBtn.addEventListener('click', function() {
         response.textContent = 'Bold choice. Incorrect, but bold.';
@@ -248,19 +248,21 @@ document.addEventListener('DOMContentLoaded', function() {
     function showArrow() {
         positionArrow();
         arrow.classList.add('is-visible');
-        if (!arrowInterval) {
-            arrowInterval = window.setInterval(positionArrow, 500);
-        }
     }
 
     updateBaseRect();
-    window.addEventListener('resize', updateBaseRect);
+    window.addEventListener('resize', function() {
+        updateBaseRect();
+        if (arrow.classList.contains('is-visible')) {
+            positionArrow();
+        }
+    });
     startAnimation();
 
     arrow.className = 'yes-arrow';
     arrow.textContent = '⬆️';
     document.body.appendChild(arrow);
-    window.setTimeout(showArrow, 30000);
+    window.setTimeout(showArrow, arrowDisplayDelayMs);
 
     document.addEventListener('mousemove', function(event) {
         const rect = noBtn.getBoundingClientRect();
