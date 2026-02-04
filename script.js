@@ -177,7 +177,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     noBtn.addEventListener('click', function() {
-        response.textContent = '😢 Maybe next time...';
+        response.textContent = 'Bold Choice. Incorrect, but bold';
         response.style.color = '#999';
         
         // Make the Yes button bigger to encourage clicking it instead
