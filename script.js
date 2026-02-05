@@ -92,17 +92,46 @@ const styleBank = [
     }
 ];
 
+const styleStorageKey = 'valentines-style-index';
+
+function getStoredStyleIndex() {
+    try {
+        const storedIndex = Number.parseInt(localStorage.getItem(styleStorageKey), 10);
+        if (Number.isInteger(storedIndex) && storedIndex >= 0 && storedIndex < styleBank.length) {
+            return storedIndex;
+        }
+    } catch (error) {
+        return null;
+    }
+    return null;
+}
+
+function storeStyleIndex(index) {
+    try {
+        localStorage.setItem(styleStorageKey, String(index));
+    } catch (error) {
+        return;
+    }
+}
+
 // Apply a random style from the style bank
-function applyRandomStyle() {
-    const randomIndex = Math.floor(Math.random() * styleBank.length);
+function applyRandomStyle(preferredIndex) {
+    const randomIndex = Number.isInteger(preferredIndex)
+        ? preferredIndex
+        : Math.floor(Math.random() * styleBank.length);
     const selectedStyle = styleBank[randomIndex];
+    if (!selectedStyle) {
+        return;
+    }
     
     // Apply background
     document.body.style.background = selectedStyle.background;
     
     // Apply container styles
     const container = document.querySelector('.container');
-    container.style.background = selectedStyle.containerBg;
+    if (container) {
+        container.style.background = selectedStyle.containerBg;
+    }
     
     // Apply heart gradient
     const heartBefore = document.querySelector('.heart');
@@ -124,22 +153,30 @@ function applyRandomStyle() {
     
     // Apply title styles
     const title = document.querySelector('.title');
-    title.style.background = selectedStyle.titleGradient;
-    title.style.webkitBackgroundClip = 'text';
-    title.style.webkitTextFillColor = 'transparent';
-    title.style.backgroundClip = 'text';
+    if (title) {
+        title.style.background = selectedStyle.titleGradient;
+        title.style.webkitBackgroundClip = 'text';
+        title.style.webkitTextFillColor = 'transparent';
+        title.style.backgroundClip = 'text';
+    }
     
     // Apply message color
     const message = document.querySelector('.message');
-    message.style.color = selectedStyle.messageColor;
+    if (message) {
+        message.style.color = selectedStyle.messageColor;
+    }
     
     // Apply button styles using data attributes
     const yesBtn = document.getElementById('yesBtn');
-    yesBtn.style.background = selectedStyle.yesButtonBg;
+    if (yesBtn) {
+        yesBtn.style.background = selectedStyle.yesButtonBg;
+    }
     
     const noBtn = document.getElementById('noBtn');
-    noBtn.style.background = selectedStyle.noButtonBg;
-    noBtn.style.color = selectedStyle.noButtonColor;
+    if (noBtn) {
+        noBtn.style.background = selectedStyle.noButtonBg;
+        noBtn.style.color = selectedStyle.noButtonColor;
+    }
     
     // Add hover effects using CSS (reuse or create style element)
     let hoverStyleElement = document.getElementById('dynamic-hover-style');
@@ -159,13 +196,17 @@ function applyRandomStyle() {
     
     // Store response color for later use
     document.body.dataset.responseColor = selectedStyle.responseColor;
+    document.body.dataset.styleIndex = randomIndex;
+    document.documentElement.style.setProperty('--accent-color', selectedStyle.responseColor);
+    storeStyleIndex(randomIndex);
     
     console.log(`Applied style: ${selectedStyle.name}`);
 }
 
 document.addEventListener('DOMContentLoaded', function() {
     // Apply random style on page load
-    applyRandomStyle();
+    const storedStyleIndex = getStoredStyleIndex();
+    applyRandomStyle(storedStyleIndex);
     
     const yesBtn = document.getElementById('yesBtn');
     const noBtn = document.getElementById('noBtn');
@@ -173,119 +214,193 @@ document.addEventListener('DOMContentLoaded', function() {
     const arrow = document.createElement('div');
     const arrowDisplayDelayMs = 20000; // Changed from 30000 to 20000 (20 seconds)
     
-    yesBtn.addEventListener('click', function() {
-        response.textContent = 'Bold choice. Incorrect, but bold.';
-        response.style.color = document.body.dataset.responseColor || '#ff6b6b';
-    });
-    
-    noBtn.addEventListener('click', function() {
-        response.textContent = 'Bold Choice. Incorrect, but bold';
-        response.style.color = '#999';
+    if (yesBtn && noBtn && response) {
+        yesBtn.addEventListener('click', function() {
+            window.location.href = 'loading.html';
+        });
         
-        // Make the Yes button bigger to encourage clicking it instead
-        yesBtn.style.transform = 'scale(1.2)';
-    });
+        noBtn.addEventListener('click', function() {
+            response.textContent = 'Bold Choice. Incorrect, but bold';
+            response.style.color = '#999';
+            
+            // Make the Yes button bigger to encourage clicking it instead
+            yesBtn.style.transform = 'scale(1.2)';
+        });
 
-    const escapeRadius = 140;
-    const maxPush = 60;
-    const easeFactor = 0.15;
-    const boundaryPadding = 12;
-    let currentX = 0;
-    let currentY = 0;
-    let targetX = 0;
-    let targetY = 0;
-    let baseLeft = 0;
-    let baseTop = 0;
+        const escapeRadius = 140;
+        const maxPush = 60;
+        const easeFactor = 0.15;
+        const boundaryPadding = 12;
+        let currentX = 0;
+        let currentY = 0;
+        let targetX = 0;
+        let targetY = 0;
+        let baseLeft = 0;
+        let baseTop = 0;
 
-    function updateBaseRect() {
-        const rect = noBtn.getBoundingClientRect();
-        baseLeft = rect.left - currentX;
-        baseTop = rect.top - currentY;
-    }
+        function updateBaseRect() {
+            const rect = noBtn.getBoundingClientRect();
+            baseLeft = rect.left - currentX;
+            baseTop = rect.top - currentY;
+        }
 
-    function clampTarget(rect) {
-        const minX = boundaryPadding - baseLeft;
-        const maxX = window.innerWidth - rect.width - boundaryPadding - baseLeft;
-        const minY = boundaryPadding - baseTop;
-        const maxY = window.innerHeight - rect.height - boundaryPadding - baseTop;
-        targetX = Math.min(Math.max(targetX, minX), maxX);
-        targetY = Math.min(Math.max(targetY, minY), maxY);
-    }
+        function clampTarget(rect) {
+            const minX = boundaryPadding - baseLeft;
+            const maxX = window.innerWidth - rect.width - boundaryPadding - baseLeft;
+            const minY = boundaryPadding - baseTop;
+            const maxY = window.innerHeight - rect.height - boundaryPadding - baseTop;
+            targetX = Math.min(Math.max(targetX, minX), maxX);
+            targetY = Math.min(Math.max(targetY, minY), maxY);
+        }
 
-    let animationId = null;
+        let animationId = null;
 
-    function animateRunaway() {
-        const deltaX = targetX - currentX;
-        const deltaY = targetY - currentY;
-        currentX += deltaX * easeFactor;
-        currentY += deltaY * easeFactor;
-        noBtn.style.setProperty('--runaway-x', `${currentX}px`);
-        noBtn.style.setProperty('--runaway-y', `${currentY}px`);
-
-        if (Math.abs(deltaX) > 0.5 || Math.abs(deltaY) > 0.5) {
-            animationId = requestAnimationFrame(animateRunaway);
-        } else {
-            currentX = targetX;
-            currentY = targetY;
+        function animateRunaway() {
+            const deltaX = targetX - currentX;
+            const deltaY = targetY - currentY;
+            currentX += deltaX * easeFactor;
+            currentY += deltaY * easeFactor;
             noBtn.style.setProperty('--runaway-x', `${currentX}px`);
             noBtn.style.setProperty('--runaway-y', `${currentY}px`);
-            animationId = null;
-        }
-    }
 
-    function startAnimation() {
-        if (!animationId) {
-            animationId = requestAnimationFrame(animateRunaway);
-        }
-    }
-
-    function positionArrow() {
-        const rect = yesBtn.getBoundingClientRect();
-        arrow.style.left = `${rect.left + rect.width / 2}px`;
-        arrow.style.top = `${rect.top - 12}px`;
-    }
-
-    function showArrow() {
-        positionArrow();
-        arrow.classList.add('is-visible');
-    }
-
-    updateBaseRect();
-    window.addEventListener('resize', function() {
-        updateBaseRect();
-        if (arrow.classList.contains('is-visible')) {
-            positionArrow();
-        }
-    });
-    startAnimation();
-
-    arrow.className = 'yes-arrow';
-    arrow.textContent = '⬆️';
-    document.body.appendChild(arrow);
-    window.setTimeout(showArrow, arrowDisplayDelayMs);
-
-    document.addEventListener('mousemove', function(event) {
-        const rect = noBtn.getBoundingClientRect();
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
-        const dx = centerX - event.clientX;
-        const dy = centerY - event.clientY;
-        const distance = Math.hypot(dx, dy);
-
-        if (distance < escapeRadius) {
-            const push = ((escapeRadius - distance) / escapeRadius) * maxPush;
-            const normX = distance === 0 ? (Math.random() - 0.5) : dx / distance;
-            const normY = distance === 0 ? (Math.random() - 0.5) : dy / distance;
-            targetX += normX * push;
-            targetY += normY * push;
-            clampTarget(rect);
-            startAnimation();
-        } else if (distance > escapeRadius * 1.4) {
-            if (targetX !== 0 || targetY !== 0) {
-                targetX = 0;
-                targetY = 0;
-                startAnimation();
+            if (Math.abs(deltaX) > 0.5 || Math.abs(deltaY) > 0.5) {
+                animationId = requestAnimationFrame(animateRunaway);
+            } else {
+                currentX = targetX;
+                currentY = targetY;
+                noBtn.style.setProperty('--runaway-x', `${currentX}px`);
+                noBtn.style.setProperty('--runaway-y', `${currentY}px`);
+                animationId = null;
             }
         }
-    });
+
+        function startAnimation() {
+            if (!animationId) {
+                animationId = requestAnimationFrame(animateRunaway);
+            }
+        }
+
+        function positionArrow() {
+            const rect = yesBtn.getBoundingClientRect();
+            arrow.style.left = `${rect.left + rect.width / 2}px`;
+            arrow.style.top = `${rect.top - 12}px`;
+        }
+
+        function showArrow() {
+            positionArrow();
+            arrow.classList.add('is-visible');
+        }
+
+        updateBaseRect();
+        window.addEventListener('resize', function() {
+            updateBaseRect();
+            if (arrow.classList.contains('is-visible')) {
+                positionArrow();
+            }
+        });
+        startAnimation();
+
+        arrow.className = 'yes-arrow';
+        arrow.textContent = '⬆️';
+        document.body.appendChild(arrow);
+        window.setTimeout(showArrow, arrowDisplayDelayMs);
+
+        document.addEventListener('mousemove', function(event) {
+            const rect = noBtn.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            const dx = centerX - event.clientX;
+            const dy = centerY - event.clientY;
+            const distance = Math.hypot(dx, dy);
+
+            if (distance < escapeRadius) {
+                const push = ((escapeRadius - distance) / escapeRadius) * maxPush;
+                const normX = distance === 0 ? (Math.random() - 0.5) : dx / distance;
+                const normY = distance === 0 ? (Math.random() - 0.5) : dy / distance;
+                targetX += normX * push;
+                targetY += normY * push;
+                clampTarget(rect);
+                startAnimation();
+            } else if (distance > escapeRadius * 1.4) {
+                if (targetX !== 0 || targetY !== 0) {
+                    targetX = 0;
+                    targetY = 0;
+                    startAnimation();
+                }
+            }
+        });
+    }
+
+    initLoadingPage();
 });
+
+function initLoadingPage() {
+    const loadingMessage = document.getElementById('loadingMessage');
+    const progressCircle = document.getElementById('loadingCircle');
+    const progressText = document.getElementById('loadingProgressText');
+    if (!loadingMessage || !progressCircle || !progressText) {
+        return;
+    }
+
+    const messages = [
+        'Okay wow this is more serious than expected…',
+        'Why is this taking so long…',
+        'This loading bar is mostly for drama…',
+        'We could’ve skipped this but where’s the fun…',
+        'Measuring how cute you look right now…',
+        'Counting reasons you’re amazing…',
+        'Backing up your answer…',
+        'Initializing romance protocol…',
+        'Verifying this isn’t a prank…',
+        'Allocating cuddle resources…',
+        'Consulting the love experts…',
+        'Polishing the happy tears…'
+    ];
+
+    const messageOrder = messages.slice();
+    for (let i = messageOrder.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [messageOrder[i], messageOrder[j]] = [messageOrder[j], messageOrder[i]];
+    }
+    let messageIndex = 0;
+    loadingMessage.textContent = messageOrder[messageIndex];
+
+    const messageIntervalMs = 3500;
+    const messageInterval = window.setInterval(() => {
+        messageIndex = (messageIndex + 1) % messageOrder.length;
+        loadingMessage.textContent = messageOrder[messageIndex];
+    }, messageIntervalMs);
+    const clearMessageInterval = () => window.clearInterval(messageInterval);
+    window.addEventListener('pagehide', clearMessageInterval);
+    window.addEventListener('beforeunload', clearMessageInterval);
+
+    const durationMs = 30000;
+    const radius = progressCircle.r && progressCircle.r.baseVal
+        ? progressCircle.r.baseVal.value
+        : Number.parseFloat(progressCircle.getAttribute('r') || '0');
+    if (!radius) {
+        clearMessageInterval();
+        return;
+    }
+    const circumference = 2 * Math.PI * radius;
+    progressCircle.style.strokeDasharray = `${circumference}`;
+    progressCircle.style.strokeDashoffset = `${circumference}`;
+
+    const startTime = performance.now();
+    function animateProgress(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / durationMs, 1);
+        const offset = circumference * (1 - progress);
+        progressCircle.style.strokeDashoffset = `${offset}`;
+        progressText.textContent = `${Math.round(progress * 100)}%`;
+
+        if (progress < 1) {
+            requestAnimationFrame(animateProgress);
+        } else {
+            clearMessageInterval();
+            window.location.href = 'final.html';
+        }
+    }
+
+    requestAnimationFrame(animateProgress);
+}
